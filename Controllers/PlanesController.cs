@@ -21,7 +21,6 @@ namespace automotriz_webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PlanesFinanciamiento>>> Existentes(){
             var planes = await Db.PlanesFinanciamientos
-                                    .Include(p => p.Autos)
                                     .Take(1000)
                                     .OrderByDescending(p => p.Id)
                                     .ToListAsync();
@@ -48,7 +47,7 @@ namespace automotriz_webapi.Controllers
         [Route("{planId}/autos")]
         public async Task<ActionResult<IEnumerable<Auto>>> AutosPorPlanId(int planId){
             var planAutos = await this.Db.Autos
-                                        .Where(pl => pl.PlanFinanciamiento == planId)
+                                        .Where(pl => pl.IdPlanFinanciamiento == planId)
                                         .ToListAsync();
             if(planAutos != null && planAutos.Count>0){
                 return Ok(planAutos);
