@@ -33,32 +33,19 @@ namespace automotriz_webapi.Controllers
         }
 
         [HttpGet]
-        [Route("/auto/{id}")]
+        [Route("{id}")]
         public async Task<ActionResult<Auto>> PorId(int id)
         {
             var auto = await this.Db.Autos.FirstOrDefaultAsync(a => a.Id == id);
-            if(auto.Equals(null)){
-                return NotFound();
+            if(auto == null){
+                return NotFound(new {
+                    code = 404,
+                    msg = $"El automovil con id: <{id}> no existe en el sistema."
+                });
             }else{
                 return auto;
             }
         }
-
-        [HttpGet]
-        [Route("/plan/{planId}")]
-        public async Task<ActionResult<IEnumerable<Auto>>> PorPlanId(int planId)
-        {
-            var autos = await this.Db.Autos
-                                  .Include(a => a.PlanFinanciamientoNavigation)
-                                  .Where(a => a.PlanFinanciamientoNavigation.Id == planId)
-                                  .ToListAsync();
-            if(autos != null && autos.Count >0){
-                return Ok(autos);
-            }else{
-                return NotFound();
-            }
-        }
-
 
     }
 }
