@@ -30,7 +30,7 @@ namespace automotriz_webapi.Controllers
                                     .Take(100)
                                     .OrderByDescending(c => c.Id)
                                     .ToListAsync();
-            return Ok(clientes);
+            return Ok( clientes);
         }
 
         /* EP para Crear un nuevo cliente en el sistema. */
@@ -92,6 +92,75 @@ namespace automotriz_webapi.Controllers
                     msg = "No se encontraron registros para el cliente solicitado."
                 });
             }
+        }
+
+        [HttpPost]
+        [Route("{clienteId}/hijos/nuevo")]
+        public async Task<IActionResult> AddHijos([FromRoute]int clienteId, [FromBody]IEnumerable<Hijo> hijos){
+            var clienteExists = Db.Clientes.Any(cl => cl.Id == clienteId);
+            if(!clienteExists) return BadRequest(new {
+                        code = 400,
+                        msg = "El cliente no existe en el sistema."
+                    });
+            foreach (var hijo in hijos)
+            {
+                if(hijo.IdCliente != clienteId){
+                    return BadRequest(new {
+                        code = 400,
+                        msg = "Los hijos deben depender del cliente seleccionado."
+                    });
+                }
+            }
+            await Db.AddRangeAsync(hijos);
+            var aff = await Db.SaveChangesAsync();
+            if(aff > 0){
+                var cliente = await Db.Clientes
+                                    .Include(cl => cl.Hijos)
+                                    .FirstOrDefaultAsync(cl => cl.Id == clienteId);
+                var hijosCliente = cliente.Hijos.Select(hc =>
+                    new {
+                        id_hijo = hc.Id,
+                        nombre_completo = hc.NombreCompleto,
+                        fecha_nacimiento = hc.FechaNacimiento,
+                        edad = hc.Edad,
+                        trabaja = hc.Trabaja,
+                    }
+                );
+                return Ok(new {
+                    cliente = cliente.Curp,
+                    cantidad_hijos = hijos.Count(),
+                    hijos = hijosCliente
+                });
+            }else{
+                return NotFound("No se pudieron crear los hijos.");
+            }
+
+        }
+
+        [HttpGet]
+        [Route("{clienteId}/hijos")]
+        public async Task<IActionResult> ObtenerHijos([FromRoute]int clienteId){
+            var cliente = await Db.Clientes
+                    .Include(cl => cl.Hijos)
+                    .FirstOrDefaultAsync(cl => cl.Id == clienteId);
+            if(cliente == null) return BadRequest(new {
+                code = 400,
+                msg = "El cliente proporcionado no existe en el sistema."
+            });
+            var hijosCliente = cliente.Hijos.Select(hc =>
+                new {
+                    id_hijo = hc.Id,
+                    nombre_completo = hc.NombreCompleto,
+                    fecha_nacimiento = hc.FechaNacimiento,
+                    edad = hc.Edad,
+                    trabaja = hc.Trabaja,
+                }
+            );
+            return Ok(new {
+                cliente = cliente.Curp,
+                cantidad_hijos = hijosCliente.Count(),
+                hijos = hijosCliente
+            });
         }
 
     }
