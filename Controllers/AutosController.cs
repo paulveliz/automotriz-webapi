@@ -72,5 +72,25 @@ namespace automotriz_webapi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("modelo/{id}")]
+        public async Task<ActionResult<Auto>> PorModeloId(int id)
+        {
+            var autos = await this.Db.Autos
+                                .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
+                                .Include(a => a.IdPlanFinanciamientoNavigation)
+                                .Where(a => a.IdModeloNavigation.Id == id)
+                                .OrderByDescending(a => a.Id)
+                                .ToListAsync();
+            if(autos == null){
+                return NotFound(new {
+                    code = 404,
+                    msg = $"La marca id: <{id}> no existe en el sistema."
+                });
+            }else{
+                return Ok(autos);
+            }
+        }
+
     }
 }
