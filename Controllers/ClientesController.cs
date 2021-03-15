@@ -34,17 +34,20 @@ namespace automotriz_webapi.Controllers
         [Route("nuevo")]
         public async Task<ActionResult<Cliente>> NuevoCliente([FromBody]Cliente cliente){
             // Validamos el body
-            if(TryValidateModel(cliente)){
-                if(ValidarCurp(cliente.Curp)){
-                    // Si ya existe, entregamos los sugeridos.
-                    return UnprocessableEntity("La curp ya existe en el sistema.");
-                }
-                var nuevoCliente = await this.Db.Clientes.AddAsync(cliente);
-                await this.Db.SaveChangesAsync();
-                return Ok(nuevoCliente);
-            }else{
+            if(!TryValidateModel(cliente)){
                 return BadRequest();
             }
+
+            if(ValidarCurp(cliente.Curp)){
+                return UnprocessableEntity(new {
+                    code = 422,
+                    msg = $"La curp <{cliente.Curp}>  ya existe en el sistema."
+                });
+            }
+            
+            var nuevoCliente = this.Db.Clientes.Add(cliente);
+            await this.Db.SaveChangesAsync();
+            return Ok(nuevoCliente.Entity);
         }
 
 

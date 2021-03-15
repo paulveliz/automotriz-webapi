@@ -133,6 +133,10 @@ namespace automotriz_webapi.Models
                     .IsRequired()
                     .HasMaxLength(55)
                     .IsUnicode(false);
+
+                entity.Property(e => e.UrlImagen)
+                    .IsUnicode(false)
+                    .HasColumnName("Url_imagen");
             });
 
             modelBuilder.Entity<Modelo>(entity =>

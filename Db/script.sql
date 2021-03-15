@@ -72,3 +72,14 @@ CREATE TABLE Solicitudes(
     FOREIGN KEY (id_cliente) REFERENCES Clientes(Id),
     FOREIGN KEY (id_plan_financiamiento) REFERENCES Planes_financiamientos(Id)
 )
+
+
+
+
+
+
+
+
+
+----------------------- FIXES ---------------------------------
+ALTER TABLE Marcas ADD Url_imagen varchar(max);

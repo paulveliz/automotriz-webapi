@@ -14,6 +14,7 @@ namespace automotriz_webapi.Models
 
         public int Id { get; set; }
         public string Nombre { get; set; }
+        public string UrlImagen { get; set; }
 
         public virtual ICollection<Modelo> Modelos { get; set; }
     }
