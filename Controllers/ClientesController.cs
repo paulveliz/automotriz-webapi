@@ -33,6 +33,104 @@ namespace automotriz_webapi.Controllers
             return Ok( clientes);
         }
 
+        [HttpGet]
+        [Route("{clienteId}")]
+        public async Task<IActionResult> ObtenerPorId([FromRoute] int clienteId){
+            var cliente = await Db.Clientes
+                                .Include(cl => cl.Solicitudes)
+                                .Include("Solicitudes.IdPlanFinanciamientoNavigation")
+                                .Include(cl => cl.Hijos)
+                                .FirstOrDefaultAsync(cl => cl.Id == clienteId);
+            if(cliente == null) return BadRequest(new {
+                code = 400,
+                msg = "El cliente solicitado no existe en el sistema."
+            });
+
+            var hijosProcessed = cliente.Hijos.Select(hijo => new {
+                id_hijo = hijo.Id,
+                nombre_completo = hijo.NombreCompleto,
+                fecha_nacimiento = hijo.FechaNacimiento,
+                edad = hijo.Edad,
+                trabaja = hijo.Trabaja
+            });
+
+            var solicitudesProcessed = cliente.Solicitudes.Select(solicitud => new {
+                id = solicitud.Id,
+                fecha_solicitud = solicitud.Fecha,
+                aprobado = solicitud.Aprobado,
+                plan_financiamiento_sugerido = (solicitud.IdPlanFinanciamientoNavigation != null) ? new {
+                            id_plan = solicitud.IdPlanFinanciamientoNavigation.Id,
+                            descipcion = solicitud.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitud.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitud.IdPlanFinanciamientoNavigation.PrecioLimite
+                        } : null
+            });
+
+            return Ok(new {
+                datos_generales = new {
+                    id_cliente = cliente.Id,
+                    nombre_completo = cliente.NombreCompleto,
+                    fecha_nacimiento = cliente.FechaNacimiento,
+                    domicilio = cliente.Domicilio,
+                    curp = cliente.Curp,
+                    ingresos_mensuales = cliente.IngresosMensuales,
+                    url_imagen = cliente.UrlImagen,
+                    edad = cliente.Edad,
+                },
+                hijos = hijosProcessed,
+                solicitudes = solicitudesProcessed
+            });
+        }
+
+        [HttpGet]
+        [Route("curp/{curp}")]
+        public async Task<IActionResult> ObtenerPorCurp([FromRoute] string curp){
+            var cliente = await Db.Clientes
+                                .Include(cl => cl.Solicitudes)
+                                .Include("Solicitudes.IdPlanFinanciamientoNavigation")
+                                .Include(cl => cl.Hijos)
+                                .FirstOrDefaultAsync(cl => cl.Curp == curp.Trim());
+            if(cliente == null) return BadRequest(new {
+                code = 400,
+                msg = "El cliente solicitado no existe en el sistema."
+            });
+
+            var hijosProcessed = cliente.Hijos.Select(hijo => new {
+                id_hijo = hijo.Id,
+                nombre_completo = hijo.NombreCompleto,
+                fecha_nacimiento = hijo.FechaNacimiento,
+                edad = hijo.Edad,
+                trabaja = hijo.Trabaja
+            });
+
+            var solicitudesProcessed = cliente.Solicitudes.Select(solicitud => new {
+                id = solicitud.Id,
+                fecha_solicitud = solicitud.Fecha,
+                aprobado = solicitud.Aprobado,
+                plan_financiamiento_sugerido = (solicitud.IdPlanFinanciamientoNavigation != null) ? new {
+                            id_plan = solicitud.IdPlanFinanciamientoNavigation.Id,
+                            descipcion = solicitud.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitud.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitud.IdPlanFinanciamientoNavigation.PrecioLimite
+                        } : null
+            });
+
+            return Ok(new {
+                datos_generales = new {
+                    id_cliente = cliente.Id,
+                    nombre_completo = cliente.NombreCompleto,
+                    fecha_nacimiento = cliente.FechaNacimiento,
+                    domicilio = cliente.Domicilio,
+                    curp = cliente.Curp,
+                    ingresos_mensuales = cliente.IngresosMensuales,
+                    url_imagen = cliente.UrlImagen,
+                    edad = cliente.Edad,
+                },
+                hijos = hijosProcessed,
+                solicitudes = solicitudesProcessed
+            });
+        }
+
         /* EP para Crear un nuevo cliente en el sistema. */
         [HttpPost]
         [Route("nuevo")]
