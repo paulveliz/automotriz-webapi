@@ -26,6 +26,8 @@ namespace automotriz_webapi.Controllers
         public async Task<ActionResult<IEnumerable<Auto>>> Existentes()
         {
             var autos = await this.Db.Autos
+                                    .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
+                                    .Include(a => a.IdPlanFinanciamientoNavigation)
                                     .Take(1000)
                                     .OrderByDescending(d => d.Id)
                                     .ToListAsync();
@@ -36,7 +38,10 @@ namespace automotriz_webapi.Controllers
         [Route("{id}")]
         public async Task<ActionResult<Auto>> PorId(int id)
         {
-            var auto = await this.Db.Autos.FirstOrDefaultAsync(a => a.Id == id);
+            var auto = await this.Db.Autos
+                                    .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
+                                    .Include(a => a.IdPlanFinanciamientoNavigation)
+                                    .FirstOrDefaultAsync(a => a.Id == id);
             if(auto == null){
                 return NotFound(new {
                     code = 404,
@@ -44,6 +49,26 @@ namespace automotriz_webapi.Controllers
                 });
             }else{
                 return auto;
+            }
+        }
+
+        [HttpGet]
+        [Route("marca/{id}")]
+        public async Task<ActionResult<Auto>> PorMarcaId(int id)
+        {
+            var autos = await this.Db.Autos
+                                .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
+                                .Include(a => a.IdPlanFinanciamientoNavigation)
+                                .Where(a => a.IdModeloNavigation.IdMarca == id)
+                                .OrderByDescending(a => a.Id)
+                                .ToListAsync();
+            if(autos == null){
+                return NotFound(new {
+                    code = 404,
+                    msg = $"La marca id: <{id}> no existe en el sistema."
+                });
+            }else{
+                return Ok(autos);
             }
         }
 

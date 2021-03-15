@@ -47,6 +47,8 @@ namespace automotriz_webapi.Controllers
         [Route("{planId}/autos")]
         public async Task<ActionResult<IEnumerable<Auto>>> AutosPorPlanId(int planId){
             var planAutos = await this.Db.Autos
+                                        .Include(p => p.IdModeloNavigation)
+                                        .Include(p => p.IdModeloNavigation.IdMarcaNavigation)
                                         .Where(pl => pl.IdPlanFinanciamiento == planId)
                                         .ToListAsync();
             if(planAutos != null && planAutos.Count>0){
