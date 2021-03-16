@@ -27,12 +27,45 @@ namespace automotriz_webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> ObtenerExistentes(){
             var clientes = await Db.Clientes
-                                    .Take(100)
+                                    .Include(cl => cl.Solicitudes)
+                                    .Include("Solicitudes.IdPlanFinanciamientoNavigation")
+                                    .Include(cl => cl.Hijos)
                                     .OrderByDescending(c => c.Id)
                                     .ToListAsync();
-            return Ok( clientes);
+            var clientesProcessed = clientes.Select(cliente => new {
+                    datos_generales = new {
+                    id_cliente = cliente.Id,
+                    nombre_completo = cliente.NombreCompleto,
+                    fecha_nacimiento = cliente.FechaNacimiento,
+                    domicilio = cliente.Domicilio,
+                    curp = cliente.Curp,
+                    ingresos_mensuales = cliente.IngresosMensuales,
+                    url_imagen = cliente.UrlImagen,
+                    edad = cliente.Edad,
+                },
+                hijos = cliente.Hijos.Select(hijo => new {
+                    id_hijo = hijo.Id,
+                    nombre_completo = hijo.NombreCompleto,
+                    fecha_nacimiento = hijo.FechaNacimiento,
+                    edad = hijo.Edad,
+                    trabaja = hijo.Trabaja
+                }),
+                solicitudes = cliente.Solicitudes.Select(solicitud => new {
+                    id = solicitud.Id,
+                    fecha_solicitud = solicitud.Fecha,
+                    aprobado = solicitud.Aprobado,
+                    plan_financiamiento_sugerido = (solicitud.IdPlanFinanciamientoNavigation != null) ? new {
+                                id_plan = solicitud.IdPlanFinanciamientoNavigation.Id,
+                                descipcion = solicitud.IdPlanFinanciamientoNavigation.Descripcion,
+                                precio_inicial = solicitud.IdPlanFinanciamientoNavigation.PrecioInicial,
+                                precio_limite = solicitud.IdPlanFinanciamientoNavigation.PrecioLimite
+                            } : null
+                })
+            });
+            return Ok(clientesProcessed);
         }
 
+        // Obtener cliente por su id.
         [HttpGet]
         [Route("{clienteId}")]
         public async Task<IActionResult> ObtenerPorId([FromRoute] int clienteId){
@@ -81,7 +114,8 @@ namespace automotriz_webapi.Controllers
                 solicitudes = solicitudesProcessed
             });
         }
-
+        
+        // Obtener cliente por su curp.
         [HttpGet]
         [Route("curp/{curp}")]
         public async Task<IActionResult> ObtenerPorCurp([FromRoute] string curp){
@@ -135,7 +169,6 @@ namespace automotriz_webapi.Controllers
         [HttpPost]
         [Route("nuevo")]
         public async Task<ActionResult<Cliente>> NuevoCliente([FromBody]Cliente cliente){
-            // Validamos el body
             if(!TryValidateModel(cliente)){
                 return BadRequest();
             }
@@ -152,6 +185,7 @@ namespace automotriz_webapi.Controllers
             return Ok(nuevoCliente.Entity);
         }
 
+        // EP Para obtener las solicitudes que ha hecho un cliente.
         [HttpGet]
         [Route("{clienteId}/solicitudes")]
         public async Task<IActionResult> ObtenerSolicitudesDeCliente(int clienteId){
@@ -192,6 +226,7 @@ namespace automotriz_webapi.Controllers
             }
         }
 
+        // EP Crear hijos
         [HttpPost]
         [Route("{clienteId}/hijos/nuevo")]
         public async Task<IActionResult> AddHijos([FromRoute]int clienteId, [FromBody]IEnumerable<Hijo> hijos){
@@ -235,6 +270,7 @@ namespace automotriz_webapi.Controllers
 
         }
 
+        // Obtener hijos de un cliente.
         [HttpGet]
         [Route("{clienteId}/hijos")]
         public async Task<IActionResult> ObtenerHijos([FromRoute]int clienteId){
