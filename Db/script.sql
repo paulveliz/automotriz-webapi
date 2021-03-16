@@ -88,3 +88,6 @@ ALTER TABLE Clientes ADD id_estado_civil int
 
 ALTER TABLE Clientes
 ADD FOREIGN KEY (id_estado_civil) REFERENCES Estados_civiles(Id);
+
+ALTER TABLE Planes_financiamientos 
+ADD min_ingreso_acumulable numeric(10,2)
