@@ -23,22 +23,43 @@ namespace automotriz_webapi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Auto>>> Existentes()
+        public async Task<IActionResult> Existentes()
         {
             var autos = await this.Db.Autos
+                                    .Include(a => a.IdModeloNavigation)
                                     .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
                                     .Include(a => a.IdPlanFinanciamientoNavigation)
-                                    .Take(1000)
                                     .OrderByDescending(d => d.Id)
                                     .ToListAsync();
-            return Ok(autos);
+            var autosProcessed = autos.Select(auto => new {
+                id_auto = auto.Id,
+                valor_comercial = auto.ValorComecial,
+                url_imagen = auto.UrlImagen,
+                marca = new {
+                    id_marca = auto.IdModeloNavigation.IdMarcaNavigation.Id,
+                    nombre = auto.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                    url_imagen = auto.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                },
+                modelo = new {
+                    id_modelo = auto.IdModeloNavigation.Id,
+                    nombre = auto.IdModeloNavigation.Nombre
+                },
+                plan_financiamiento = new {
+                    id_plan = auto.IdPlanFinanciamientoNavigation.Id,
+                    descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
+                    precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                    precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                }
+            });
+            return Ok(autosProcessed);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<Auto>> PorId(int id)
+        public async Task<IActionResult> PorId(int id)
         {
             var auto = await this.Db.Autos
+                                    .Include(a => a.IdModeloNavigation)
                                     .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
                                     .Include(a => a.IdPlanFinanciamientoNavigation)
                                     .FirstOrDefaultAsync(a => a.Id == id);
@@ -48,7 +69,27 @@ namespace automotriz_webapi.Controllers
                     msg = $"El automovil con id: <{id}> no existe en el sistema."
                 });
             }else{
-                return auto;
+                var autoProcessed = new {
+                    id_auto = auto.Id,
+                    valor_comercial = auto.ValorComecial,
+                    url_imagen = auto.UrlImagen,
+                    marca = new {
+                        id_marca = auto.IdModeloNavigation.IdMarcaNavigation.Id,
+                        nombre = auto.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                        url_imagen = auto.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                    },
+                    modelo = new {
+                        id_modelo = auto.IdModeloNavigation.Id,
+                        nombre = auto.IdModeloNavigation.Nombre
+                    },
+                    plan_financiamiento = new {
+                        id_plan = auto.IdPlanFinanciamientoNavigation.Id,
+                        descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
+                        precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                        precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                    }
+                };
+                return Ok(autoProcessed);
             }
         }
 
@@ -57,6 +98,7 @@ namespace automotriz_webapi.Controllers
         public async Task<ActionResult<Auto>> PorMarcaId(int id)
         {
             var autos = await this.Db.Autos
+                                .Include(a => a.IdModeloNavigation)
                                 .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
                                 .Include(a => a.IdPlanFinanciamientoNavigation)
                                 .Where(a => a.IdModeloNavigation.IdMarca == id)
@@ -68,7 +110,27 @@ namespace automotriz_webapi.Controllers
                     msg = $"La marca id: <{id}> no existe en el sistema."
                 });
             }else{
-                return Ok(autos);
+                var autosProcessed = autos.Select(auto => new {
+                    id_auto = auto.Id,
+                    valor_comercial = auto.ValorComecial,
+                    url_imagen = auto.UrlImagen,
+                    marca = new {
+                        id_marca = auto.IdModeloNavigation.IdMarcaNavigation.Id,
+                        nombre = auto.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                        url_imagen = auto.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                    },
+                    modelo = new {
+                        id_modelo = auto.IdModeloNavigation.Id,
+                        nombre = auto.IdModeloNavigation.Nombre
+                    },
+                    plan_financiamiento = new {
+                        id_plan = auto.IdPlanFinanciamientoNavigation.Id,
+                        descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
+                        precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                        precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                    }
+                });
+                return Ok(autosProcessed);
             }
         }
 
@@ -77,6 +139,7 @@ namespace automotriz_webapi.Controllers
         public async Task<ActionResult<Auto>> PorModeloId(int id)
         {
             var autos = await this.Db.Autos
+                                .Include(a => a.IdModeloNavigation)
                                 .Include(a => a.IdModeloNavigation.IdMarcaNavigation)
                                 .Include(a => a.IdPlanFinanciamientoNavigation)
                                 .Where(a => a.IdModeloNavigation.Id == id)
@@ -88,7 +151,27 @@ namespace automotriz_webapi.Controllers
                     msg = $"La marca id: <{id}> no existe en el sistema."
                 });
             }else{
-                return Ok(autos);
+                var autosProcessed = autos.Select(auto => new {
+                    id_auto = auto.Id,
+                    valor_comercial = auto.ValorComecial,
+                    url_imagen = auto.UrlImagen,
+                    marca = new {
+                        id_marca = auto.IdModeloNavigation.IdMarcaNavigation.Id,
+                        nombre = auto.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                        url_imagen = auto.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                    },
+                    modelo = new {
+                        id_modelo = auto.IdModeloNavigation.Id,
+                        nombre = auto.IdModeloNavigation.Nombre
+                    },
+                    plan_financiamiento = new {
+                        id_plan = auto.IdPlanFinanciamientoNavigation.Id,
+                        descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
+                        precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                        precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                    }
+                });
+                return Ok(autosProcessed);
             }
         }
 
