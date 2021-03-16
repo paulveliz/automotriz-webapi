@@ -83,3 +83,8 @@ CREATE TABLE Solicitudes(
 
 ----------------------- FIXES ---------------------------------
 ALTER TABLE Marcas ADD Url_imagen varchar(max);
+
+ALTER TABLE Clientes ADD id_estado_civil int
+
+ALTER TABLE Clientes
+ADD FOREIGN KEY (id_estado_civil) REFERENCES Estados_civiles(Id);

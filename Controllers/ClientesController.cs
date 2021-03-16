@@ -27,21 +27,23 @@ namespace automotriz_webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> ObtenerExistentes(){
             var clientes = await Db.Clientes
+                                    .Include(cl => cl.IdEstadoCivilNavigation)
                                     .Include(cl => cl.Solicitudes)
                                     .Include("Solicitudes.IdPlanFinanciamientoNavigation")
                                     .Include(cl => cl.Hijos)
                                     .OrderByDescending(c => c.Id)
                                     .ToListAsync();
             var clientesProcessed = clientes.Select(cliente => new {
-                    datos_generales = new {
-                    id_cliente = cliente.Id,
-                    nombre_completo = cliente.NombreCompleto,
-                    fecha_nacimiento = cliente.FechaNacimiento,
-                    domicilio = cliente.Domicilio,
-                    curp = cliente.Curp,
-                    ingresos_mensuales = cliente.IngresosMensuales,
-                    url_imagen = cliente.UrlImagen,
-                    edad = cliente.Edad,
+                datos_generales = new {
+                        id_cliente = cliente.Id,
+                        nombre_completo = cliente.NombreCompleto,
+                        fecha_nacimiento = cliente.FechaNacimiento,
+                        domicilio = cliente.Domicilio,
+                        curp = cliente.Curp,
+                        ingresos_mensuales = cliente.IngresosMensuales,
+                        url_imagen = cliente.UrlImagen,
+                        edad = cliente.Edad,
+                        estado_civil = cliente.IdEstadoCivilNavigation.Tipo
                 },
                 hijos = cliente.Hijos.Select(hijo => new {
                     id_hijo = hijo.Id,
@@ -70,6 +72,7 @@ namespace automotriz_webapi.Controllers
         [Route("{clienteId}")]
         public async Task<IActionResult> ObtenerPorId([FromRoute] int clienteId){
             var cliente = await Db.Clientes
+                                .Include(cl => cl.IdEstadoCivilNavigation)
                                 .Include(cl => cl.Solicitudes)
                                 .Include("Solicitudes.IdPlanFinanciamientoNavigation")
                                 .Include(cl => cl.Hijos)
@@ -109,6 +112,7 @@ namespace automotriz_webapi.Controllers
                     ingresos_mensuales = cliente.IngresosMensuales,
                     url_imagen = cliente.UrlImagen,
                     edad = cliente.Edad,
+                    estado_civil = cliente.IdEstadoCivilNavigation.Tipo
                 },
                 hijos = hijosProcessed,
                 solicitudes = solicitudesProcessed
@@ -121,6 +125,7 @@ namespace automotriz_webapi.Controllers
         public async Task<IActionResult> ObtenerPorCurp([FromRoute] string curp){
             var cliente = await Db.Clientes
                                 .Include(cl => cl.Solicitudes)
+                                .Include(cl => cl.IdEstadoCivilNavigation)
                                 .Include("Solicitudes.IdPlanFinanciamientoNavigation")
                                 .Include(cl => cl.Hijos)
                                 .FirstOrDefaultAsync(cl => cl.Curp == curp.Trim());
@@ -159,6 +164,7 @@ namespace automotriz_webapi.Controllers
                     ingresos_mensuales = cliente.IngresosMensuales,
                     url_imagen = cliente.UrlImagen,
                     edad = cliente.Edad,
+                    estado_civil = cliente.IdEstadoCivilNavigation.Tipo
                 },
                 hijos = hijosProcessed,
                 solicitudes = solicitudesProcessed

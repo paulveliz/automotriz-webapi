@@ -30,6 +30,7 @@ namespace automotriz_webapi.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Server=tcp:schoolpaulveliz.database.windows.net,1433;Initial Catalog=automotriz;Persist Security Info=False;User ID=paulveliz;Password=qwerty123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
             }
         }
@@ -81,6 +82,8 @@ namespace automotriz_webapi.Models
                     .HasColumnType("date")
                     .HasColumnName("Fecha_nacimiento");
 
+                entity.Property(e => e.IdEstadoCivil).HasColumnName("id_estado_civil");
+
                 entity.Property(e => e.IngresosMensuales)
                     .HasColumnType("numeric(10, 2)")
                     .HasColumnName("Ingresos_mensuales");
@@ -93,6 +96,11 @@ namespace automotriz_webapi.Models
                 entity.Property(e => e.UrlImagen)
                     .IsUnicode(false)
                     .HasColumnName("Url_imagen");
+
+                entity.HasOne(d => d.IdEstadoCivilNavigation)
+                    .WithMany(p => p.Clientes)
+                    .HasForeignKey(d => d.IdEstadoCivil)
+                    .HasConstraintName("FK__Clientes__id_est__00200768");
             });
 
             modelBuilder.Entity<EstadosCivile>(entity =>
