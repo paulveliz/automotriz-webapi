@@ -19,19 +19,41 @@ namespace automotriz_webapi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlanesFinanciamiento>>> Existentes(){
+        public async Task<IActionResult> Existentes(){
             var planes = await Db.PlanesFinanciamientos
-                                    .Take(1000)
+                                    .Include(pl => pl.Autos)
+                                    .Include("Autos.IdModeloNavigation.IdMarcaNavigation")
                                     .OrderByDescending(p => p.Id)
                                     .ToListAsync();
-            return planes;
+            var planesProcessed = planes.Select(plan => new {
+                id_plan = plan.Id,
+                descripcion = plan.Descripcion,
+                precio_inicial = plan.PrecioInicial,
+                precio_limite = plan.PrecioLimite,
+                autos = plan.Autos.Select(automovil => new {
+                    id_auto = automovil.Id,
+                    valor_comercial = automovil.ValorComecial,
+                    url_imagen = automovil.UrlImagen,
+                    marca = new {
+                        id_marca = automovil.IdModeloNavigation.IdMarcaNavigation.Id,
+                        nombre = automovil.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                        url_imagen = automovil.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                    },
+                    modelo = new {
+                        id_modelo = automovil.IdModeloNavigation.Id,
+                        nombre = automovil.IdModeloNavigation.Nombre
+                    }
+                })
+            });
+            return Ok(planesProcessed);
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<PlanesFinanciamiento>> PorId(int id){
             var plan = await Db.PlanesFinanciamientos
-                                    .Include(p => p.Autos)
+                                    .Include(pl => pl.Autos)
+                                    .Include("Autos.IdModeloNavigation.IdMarcaNavigation")
                                     .FirstOrDefaultAsync(p => p.Id == id);
             if(plan == null){
                 return NotFound(new {
@@ -39,7 +61,27 @@ namespace automotriz_webapi.Controllers
                     msg = "Plan no encontrado."
                 });
             }else{
-                return Ok(plan);
+                var planProcessed = new {
+                    id_plan = plan.Id,
+                    descripcion = plan.Descripcion,
+                    precio_inicial = plan.PrecioInicial,
+                    precio_limite = plan.PrecioLimite,
+                    autos = plan.Autos.Select(automovil => new {
+                        id_auto = automovil.Id,
+                        valor_comercial = automovil.ValorComecial,
+                        url_imagen = automovil.UrlImagen,
+                        marca = new {
+                            id_marca = automovil.IdModeloNavigation.IdMarcaNavigation.Id,
+                            nombre = automovil.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                            url_imagen = automovil.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                        },
+                        modelo = new {
+                            id_modelo = automovil.IdModeloNavigation.Id,
+                            nombre = automovil.IdModeloNavigation.Nombre
+                        }
+                    })
+                };
+                return Ok(planProcessed);
             }
         }
 
