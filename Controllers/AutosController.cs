@@ -47,8 +47,8 @@ namespace automotriz_webapi.Controllers
                 plan_financiamiento = new {
                     id_plan = auto.IdPlanFinanciamientoNavigation.Id,
                     descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
-                    precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
-                    precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                    precio_inicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                    precio_limite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
                 }
             });
             return Ok(autosProcessed);
@@ -85,8 +85,8 @@ namespace automotriz_webapi.Controllers
                     plan_financiamiento = new {
                         id_plan = auto.IdPlanFinanciamientoNavigation.Id,
                         descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
-                        precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
-                        precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                        precio_inicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                        precio_limite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
                     }
                 };
                 return Ok(autoProcessed);
@@ -126,8 +126,8 @@ namespace automotriz_webapi.Controllers
                     plan_financiamiento = new {
                         id_plan = auto.IdPlanFinanciamientoNavigation.Id,
                         descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
-                        precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
-                        precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                        precio_inicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                        precio_limite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
                     }
                 });
                 return Ok(autosProcessed);
@@ -167,8 +167,8 @@ namespace automotriz_webapi.Controllers
                     plan_financiamiento = new {
                         id_plan = auto.IdPlanFinanciamientoNavigation.Id,
                         descripcion = auto.IdPlanFinanciamientoNavigation.Descripcion,
-                        precioInicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
-                        precioLimite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
+                        precio_inicial = auto.IdPlanFinanciamientoNavigation.PrecioInicial,
+                        precio_limite = auto.IdPlanFinanciamientoNavigation.PrecioLimite
                     }
                 });
                 return Ok(autosProcessed);
