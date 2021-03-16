@@ -17,6 +17,7 @@ namespace automotriz_webapi.Models
         public string Descripcion { get; set; }
         public decimal? PrecioInicial { get; set; }
         public decimal? PrecioLimite { get; set; }
+        public decimal? MinIngresoAcumulable { get; set; }
 
         public virtual ICollection<Auto> Autos { get; set; }
         public virtual ICollection<Solicitude> Solicitudes { get; set; }

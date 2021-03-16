@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -9,6 +8,10 @@ namespace automotriz_webapi.Models
 {
     public partial class automotrizContext : DbContext
     {
+        public automotrizContext()
+        {
+        }
+
         public automotrizContext(DbContextOptions<automotrizContext> options)
             : base(options)
         {
@@ -158,6 +161,10 @@ namespace automotriz_webapi.Models
                 entity.Property(e => e.Descripcion)
                     .IsRequired()
                     .HasColumnType("text");
+
+                entity.Property(e => e.MinIngresoAcumulable)
+                    .HasColumnType("numeric(10, 2)")
+                    .HasColumnName("min_ingreso_acumulable");
 
                 entity.Property(e => e.PrecioInicial)
                     .HasColumnType("numeric(18, 2)")
