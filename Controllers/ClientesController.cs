@@ -186,9 +186,22 @@ namespace automotriz_webapi.Controllers
                 });
             }
             
-            var nuevoCliente = this.Db.Clientes.Add(cliente);
+            var nuevoCliente = await this.Db.Clientes.AddAsync(cliente);
             await this.Db.SaveChangesAsync();
-            return Ok(nuevoCliente.Entity);
+            var cl = await Db.Clientes
+                            .Include(cl => cl.IdEstadoCivilNavigation)
+                            .FirstOrDefaultAsync(cl => cl.Id == nuevoCliente.Entity.Id);
+            return Ok(new {
+                id_cliente = cl.Id,
+                nombre_completo = cl.NombreCompleto,
+                fecha_nacimiento = cl.FechaNacimiento,
+                domicilio = cl.Domicilio,
+                curp = cl.Curp,
+                ingresos_mensuales = cl.IngresosMensuales,
+                url_imagen = cl.UrlImagen,
+                edad = cl.Edad,
+                estado_civil = cl.IdEstadoCivilNavigation.Tipo
+            });
         }
 
         // EP Para obtener las solicitudes que ha hecho un cliente.
@@ -267,7 +280,6 @@ namespace automotriz_webapi.Controllers
                 );
                 return Ok(new {
                     cliente = cliente.Curp,
-                    cantidad_hijos = hijos.Count(),
                     hijos = hijosCliente
                 });
             }else{
