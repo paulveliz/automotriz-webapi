@@ -190,8 +190,48 @@ namespace automotriz_webapi.Controllers
             var nuevoCliente = await this.Db.Clientes.AddAsync(cliente);
             await this.Db.SaveChangesAsync();
 
-            var cl = await ObtenerPorId(nuevoCliente.Entity.Id);
-            return StatusCode(201, cl);
+            var createdClient = await this.Db.Clientes
+                .Include(cl => cl.Solicitudes)
+                .Include(cl => cl.IdEstadoCivilNavigation)
+                .Include("Solicitudes.IdPlanFinanciamientoNavigation")
+                .Include(cl => cl.Hijos)
+                .FirstOrDefaultAsync(cl => cl.Id == nuevoCliente.Entity.Id);
+
+            var hijosProcessed = createdClient.Hijos.Select(hijo => new {
+                id_hijo = hijo.Id,
+                nombre_completo = hijo.NombreCompleto,
+                fecha_nacimiento = hijo.FechaNacimiento,
+                edad = hijo.Edad,
+                trabaja = hijo.Trabaja
+            });
+
+            var solicitudesProcessed = createdClient.Solicitudes.Select(solicitud => new {
+                id = solicitud.Id,
+                fecha_solicitud = solicitud.Fecha,
+                aprobado = solicitud.Aprobado,
+                plan_financiamiento_sugerido = (solicitud.IdPlanFinanciamientoNavigation != null) ? new {
+                            id_plan = solicitud.IdPlanFinanciamientoNavigation.Id,
+                            descipcion = solicitud.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitud.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitud.IdPlanFinanciamientoNavigation.PrecioLimite
+                        } : null
+            });
+
+            return Ok(new {
+                datos_generales = new {
+                    id_cliente = createdClient.Id,
+                    nombre_completo = createdClient.NombreCompleto,
+                    fecha_nacimiento = createdClient.FechaNacimiento,
+                    domicilio = createdClient.Domicilio,
+                    curp = createdClient.Curp,
+                    ingresos_mensuales = createdClient.IngresosMensuales,
+                    url_imagen = createdClient.UrlImagen,
+                    edad = createdClient.Edad,
+                    estado_civil = createdClient.IdEstadoCivilNavigation.Tipo
+                },
+                hijos = hijosProcessed,
+                solicitudes = solicitudesProcessed
+            });
         }
 
         // EP Para obtener las solicitudes que ha hecho un cliente.
