@@ -186,22 +186,12 @@ namespace automotriz_webapi.Controllers
                 });
             }
             
+            // TODO: VERIFICAR SI ES MODIFICABLE LIKE SEARCH BY EFCORE.
             var nuevoCliente = await this.Db.Clientes.AddAsync(cliente);
             await this.Db.SaveChangesAsync();
-            var cl = await Db.Clientes
-                            .Include(cl => cl.IdEstadoCivilNavigation)
-                            .FirstOrDefaultAsync(cl => cl.Id == nuevoCliente.Entity.Id);
-            return Ok(new {
-                id_cliente = cl.Id,
-                nombre_completo = cl.NombreCompleto,
-                fecha_nacimiento = cl.FechaNacimiento,
-                domicilio = cl.Domicilio,
-                curp = cl.Curp,
-                ingresos_mensuales = cl.IngresosMensuales,
-                url_imagen = cl.UrlImagen,
-                edad = cl.Edad,
-                estado_civil = cl.IdEstadoCivilNavigation.Tipo
-            });
+
+            var cl = await ObtenerPorId(nuevoCliente.Entity.Id);
+            return StatusCode(201, cl);
         }
 
         // EP Para obtener las solicitudes que ha hecho un cliente.
