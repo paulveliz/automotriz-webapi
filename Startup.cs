@@ -29,6 +29,11 @@ namespace automotriz_webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => {
+                options.AddDefaultPolicy(builder => {
+                    builder.WithOrigins("http://localhost:4200");
+                });
+            });
             services.AddDbContext<automotrizContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("automotriz"))
             );
@@ -48,6 +53,8 @@ namespace automotriz_webapi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
