@@ -18,7 +18,7 @@ namespace automotriz_webapi.Controllers
             this.Db = db;
         }
 
-        private async Task<(PlanesFinanciamiento plan, Solicitude solicitud, decimal? ingresoAcumulable)> ObtenerSugerido(int porcentaje, Cliente cliente, Solicitude solicitud){
+        private async Task<(Solicitude solicitud, decimal? ingresoAcumulable)> ObtenerSugerido(int porcentaje, Cliente cliente, Solicitude solicitud){
                 var ingresoAcumulable = cliente.IngresosMensuales * porcentaje / 100;
                 var planSugerido = await Db.PlanesFinanciamientos
                                     .Where(pl => pl.MinIngresoAcumulable <= ingresoAcumulable)
@@ -26,8 +26,8 @@ namespace automotriz_webapi.Controllers
                                     .ToListAsync();
                 solicitud.IdCliente = cliente.Id;
                 solicitud.Aprobado = true;
-                solicitud.IdPlanFinanciamiento = planSugerido[0].Id;
-                return (planSugerido[0], solicitud, ingresoAcumulable);
+                solicitud.IdPlanFinanciamiento = ingresoAcumulable < 5000 ? 1 : planSugerido[0].Id;
+                return (solicitud, ingresoAcumulable);
         }
 
         /* Crear nueva solicitud, ejecutar algoritmo de asignacion de plan sugerido. */
@@ -46,23 +46,27 @@ namespace automotriz_webapi.Controllers
                 var sugeridoResponse = await ObtenerSugerido(80, cliente, solicitud);
                 var solicitudResponse = await Db.Solicitudes.AddAsync(sugeridoResponse.solicitud);
                 await Db.SaveChangesAsync();
+                var solicitudFromDb = await this.Db.Solicitudes
+                                                .Include(sl => sl.IdClienteNavigation)
+                                                .Include(sl => sl.IdPlanFinanciamientoNavigation)
+                                                .FirstOrDefaultAsync(sl => sl.Id == solicitudResponse.Entity.Id);
                 return Ok(new {
-                    id_solicitud = solicitudResponse.Entity.Id,
-                    fecha_solicitud = solicitudResponse.Entity.Fecha,
+                    id_solicitud = solicitudFromDb.Id,
+                    fecha_solicitud = solicitudFromDb.Fecha,
                     cliente = new {
-                        id_cliente = solicitudResponse.Entity.IdClienteNavigation.Id,
-                        curp = solicitudResponse.Entity.IdClienteNavigation.Curp,
-                        nombre_completo = solicitudResponse.Entity.IdClienteNavigation.NombreCompleto,
+                        id_cliente = solicitudFromDb.IdClienteNavigation.Id,
+                        curp = solicitudFromDb.IdClienteNavigation.Curp,
+                        nombre_completo = solicitudFromDb.IdClienteNavigation.NombreCompleto,
                         ingreso_acumulable_actual = sugeridoResponse.ingresoAcumulable,
                     },
                     resultados = new {
-                        aprobado = solicitudResponse.Entity.Aprobado,
+                        aprobado = solicitudFromDb.Aprobado,
                         plan_sugerido = new {
-                            id_plan = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Id,
-                            descripcion = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Descripcion,
-                            precio_inicial = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioInicial,
-                            precio_limite = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioLimite,
-                            min_ingreso_acumulable = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
+                            id_plan = solicitudFromDb.IdPlanFinanciamientoNavigation.Id,
+                            descripcion = solicitudFromDb.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioLimite,
+                            min_ingreso_acumulable = solicitudFromDb.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
                         }
                     }
                 });
@@ -71,23 +75,27 @@ namespace automotriz_webapi.Controllers
                 var sugeridoResponse = await ObtenerSugerido(70, cliente, solicitud);
                 var solicitudResponse = await Db.Solicitudes.AddAsync(sugeridoResponse.solicitud);
                 await Db.SaveChangesAsync();
+                var solicitudFromDb = await this.Db.Solicitudes
+                                                .Include(sl => sl.IdClienteNavigation)
+                                                .Include(sl => sl.IdPlanFinanciamientoNavigation)
+                                                .FirstOrDefaultAsync(sl => sl.Id == solicitudResponse.Entity.Id);
                 return Ok(new {
-                    id_solicitud = solicitudResponse.Entity.Id,
-                    fecha_solicitud = solicitudResponse.Entity.Fecha,
+                    id_solicitud = solicitudFromDb.Id,
+                    fecha_solicitud = solicitudFromDb.Fecha,
                     cliente = new {
-                        id_cliente = solicitudResponse.Entity.IdClienteNavigation.Id,
-                        curp = solicitudResponse.Entity.IdClienteNavigation.Curp,
-                        nombre_completo = solicitudResponse.Entity.IdClienteNavigation.NombreCompleto,
+                        id_cliente = solicitudFromDb.IdClienteNavigation.Id,
+                        curp = solicitudFromDb.IdClienteNavigation.Curp,
+                        nombre_completo = solicitudFromDb.IdClienteNavigation.NombreCompleto,
                         ingreso_acumulable_actual = sugeridoResponse.ingresoAcumulable,
                     },
                     resultados = new {
-                        aprobado = solicitudResponse.Entity.Aprobado,
+                        aprobado = solicitudFromDb.Aprobado,
                         plan_sugerido = new {
-                            id_plan = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Id,
-                            descripcion = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Descripcion,
-                            precio_inicial = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioInicial,
-                            precio_limite = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioLimite,
-                            min_ingreso_acumulable = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
+                            id_plan = solicitudFromDb.IdPlanFinanciamientoNavigation.Id,
+                            descripcion = solicitudFromDb.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioLimite,
+                            min_ingreso_acumulable = solicitudFromDb.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
                         }
                     }
                 });
@@ -96,23 +104,27 @@ namespace automotriz_webapi.Controllers
                 var sugeridoResponse = await ObtenerSugerido(60, cliente, solicitud);
                 var solicitudResponse = await Db.Solicitudes.AddAsync(sugeridoResponse.solicitud);
                 await Db.SaveChangesAsync();
+                var solicitudFromDb = await this.Db.Solicitudes
+                                                .Include(sl => sl.IdClienteNavigation)
+                                                .Include(sl => sl.IdPlanFinanciamientoNavigation)
+                                                .FirstOrDefaultAsync(sl => sl.Id == solicitudResponse.Entity.Id);
                 return Ok(new {
-                    id_solicitud = solicitudResponse.Entity.Id,
-                    fecha_solicitud = solicitudResponse.Entity.Fecha,
+                    id_solicitud = solicitudFromDb.Id,
+                    fecha_solicitud = solicitudFromDb.Fecha,
                     cliente = new {
-                        id_cliente = solicitudResponse.Entity.IdClienteNavigation.Id,
-                        curp = solicitudResponse.Entity.IdClienteNavigation.Curp,
-                        nombre_completo = solicitudResponse.Entity.IdClienteNavigation.NombreCompleto,
+                        id_cliente = solicitudFromDb.IdClienteNavigation.Id,
+                        curp = solicitudFromDb.IdClienteNavigation.Curp,
+                        nombre_completo = solicitudFromDb.IdClienteNavigation.NombreCompleto,
                         ingreso_acumulable_actual = sugeridoResponse.ingresoAcumulable,
                     },
                     resultados = new {
-                        aprobado = solicitudResponse.Entity.Aprobado,
+                        aprobado = solicitudFromDb.Aprobado,
                         plan_sugerido = new {
-                            id_plan = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Id,
-                            descripcion = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Descripcion,
-                            precio_inicial = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioInicial,
-                            precio_limite = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioLimite,
-                            min_ingreso_acumulable = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
+                            id_plan = solicitudFromDb.IdPlanFinanciamientoNavigation.Id,
+                            descripcion = solicitudFromDb.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioLimite,
+                            min_ingreso_acumulable = solicitudFromDb.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
                         }
                     }
                 });
@@ -121,23 +133,27 @@ namespace automotriz_webapi.Controllers
                 var sugeridoResponse = await ObtenerSugerido(55, cliente, solicitud);
                 var solicitudResponse = await Db.Solicitudes.AddAsync(sugeridoResponse.solicitud);
                 await Db.SaveChangesAsync();
+                var solicitudFromDb = await this.Db.Solicitudes
+                                                .Include(sl => sl.IdClienteNavigation)
+                                                .Include(sl => sl.IdPlanFinanciamientoNavigation)
+                                                .FirstOrDefaultAsync(sl => sl.Id == solicitudResponse.Entity.Id);
                 return Ok(new {
-                    id_solicitud = solicitudResponse.Entity.Id,
-                    fecha_solicitud = solicitudResponse.Entity.Fecha,
+                    id_solicitud = solicitudFromDb.Id,
+                    fecha_solicitud = solicitudFromDb.Fecha,
                     cliente = new {
-                        id_cliente = solicitudResponse.Entity.IdClienteNavigation.Id,
-                        curp = solicitudResponse.Entity.IdClienteNavigation.Curp,
-                        nombre_completo = solicitudResponse.Entity.IdClienteNavigation.NombreCompleto,
+                        id_cliente = solicitudFromDb.IdClienteNavigation.Id,
+                        curp = solicitudFromDb.IdClienteNavigation.Curp,
+                        nombre_completo = solicitudFromDb.IdClienteNavigation.NombreCompleto,
                         ingreso_acumulable_actual = sugeridoResponse.ingresoAcumulable,
                     },
                     resultados = new {
-                        aprobado = solicitudResponse.Entity.Aprobado,
+                        aprobado = solicitudFromDb.Aprobado,
                         plan_sugerido = new {
-                            id_plan = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Id,
-                            descripcion = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Descripcion,
-                            precio_inicial = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioInicial,
-                            precio_limite = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioLimite,
-                            min_ingreso_acumulable = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
+                            id_plan = solicitudFromDb.IdPlanFinanciamientoNavigation.Id,
+                            descripcion = solicitudFromDb.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioLimite,
+                            min_ingreso_acumulable = solicitudFromDb.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
                         }
                     }
                 });
@@ -146,23 +162,27 @@ namespace automotriz_webapi.Controllers
                 var sugeridoResponse = await ObtenerSugerido(50, cliente, solicitud);
                 var solicitudResponse = await Db.Solicitudes.AddAsync(sugeridoResponse.solicitud);
                 await Db.SaveChangesAsync();
+                var solicitudFromDb = await this.Db.Solicitudes
+                                                .Include(sl => sl.IdClienteNavigation)
+                                                .Include(sl => sl.IdPlanFinanciamientoNavigation)
+                                                .FirstOrDefaultAsync(sl => sl.Id == solicitudResponse.Entity.Id);
                 return Ok(new {
-                    id_solicitud = solicitudResponse.Entity.Id,
-                    fecha_solicitud = solicitudResponse.Entity.Fecha,
+                    id_solicitud = solicitudFromDb.Id,
+                    fecha_solicitud = solicitudFromDb.Fecha,
                     cliente = new {
-                        id_cliente = solicitudResponse.Entity.IdClienteNavigation.Id,
-                        curp = solicitudResponse.Entity.IdClienteNavigation.Curp,
-                        nombre_completo = solicitudResponse.Entity.IdClienteNavigation.NombreCompleto,
+                        id_cliente = solicitudFromDb.IdClienteNavigation.Id,
+                        curp = solicitudFromDb.IdClienteNavigation.Curp,
+                        nombre_completo = solicitudFromDb.IdClienteNavigation.NombreCompleto,
                         ingreso_acumulable_actual = sugeridoResponse.ingresoAcumulable,
                     },
                     resultados = new {
-                        aprobado = solicitudResponse.Entity.Aprobado,
+                        aprobado = solicitudFromDb.Aprobado,
                         plan_sugerido = new {
-                            id_plan = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Id,
-                            descripcion = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.Descripcion,
-                            precio_inicial = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioInicial,
-                            precio_limite = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.PrecioLimite,
-                            min_ingreso_acumulable = solicitudResponse.Entity.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
+                            id_plan = solicitudFromDb.IdPlanFinanciamientoNavigation.Id,
+                            descripcion = solicitudFromDb.IdPlanFinanciamientoNavigation.Descripcion,
+                            precio_inicial = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioInicial,
+                            precio_limite = solicitudFromDb.IdPlanFinanciamientoNavigation.PrecioLimite,
+                            min_ingreso_acumulable = solicitudFromDb.IdPlanFinanciamientoNavigation.MinIngresoAcumulable
                         }
                     }
                 });
