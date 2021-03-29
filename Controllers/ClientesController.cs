@@ -25,7 +25,6 @@ namespace automotriz_webapi.Controllers
         private bool ValidarCurp(string curp) => this.Db.Clientes.Any(cl => cl.Curp == curp);
 
         /* EP para obtener los clientes existentes en el sistema. */
-        [DisableCors]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> ObtenerExistentes(){
             var clientes = await Db.Clientes

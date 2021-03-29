@@ -57,8 +57,8 @@ namespace automotriz_webapi
 
             app.UseRouting();
 
-            app.UseCors();
-
+            app.UseCors("ApiCorsPolicy");
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
