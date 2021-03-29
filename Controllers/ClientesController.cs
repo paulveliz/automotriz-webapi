@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using automotriz_webapi.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,7 @@ namespace automotriz_webapi.Controllers
         private bool ValidarCurp(string curp) => this.Db.Clientes.Any(cl => cl.Curp == curp);
 
         /* EP para obtener los clientes existentes en el sistema. */
+        [DisableCors]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> ObtenerExistentes(){
             var clientes = await Db.Clientes
