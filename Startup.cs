@@ -29,14 +29,8 @@ namespace automotriz_webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options => {
-                options.AddDefaultPolicy(builder => {
-                    builder.WithOrigins("*")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowAnyOrigin();
-                });
-            });
+            services.AddCors();
+            
             services.AddDbContext<automotrizContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("automotriz"))
             );
@@ -57,8 +51,15 @@ namespace automotriz_webapi
 
             app.UseRouting();
 
-            app.UseCors("ApiCorsPolicy");
             
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
