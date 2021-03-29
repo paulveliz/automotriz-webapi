@@ -31,7 +31,7 @@ namespace automotriz_webapi
         {
             services.AddCors(options => {
                 options.AddDefaultPolicy(builder => {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins("https://delightful-forest-0211cd210.azurestaticapps.net/")
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowAnyOrigin();
