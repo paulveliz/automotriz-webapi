@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using automotriz_webapi.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,20 @@ namespace automotriz_webapi.Controllers
                 solicitud.IdPlanFinanciamiento = ingresoAcumulable < 5000 ? 1 : planSugerido[0].Id;
                 return (solicitud, ingresoAcumulable);
         }
-
+        // pending
+        /* Verificar cliente registrado contra plan */
+        [HttpPost]
+        [Route("cliente/validar_plan/{cliente}")]
+        public async Task<IActionResult> Validar([FromRoute]int cliente){
+            var lastSolicitud = await this.Db.Solicitudes
+                                            .Include(sl => sl.IdPlanFinanciamientoNavigation)
+                                            .LastOrDefaultAsync(sl => sl.IdCliente == cliente);
+            if(lastSolicitud == null) return NotFound();
+            return Ok(new {
+                plan = lastSolicitud.IdPlanFinanciamiento,
+                msg = $"El cliente actualmente cuenta con el plan ${lastSolicitud.IdPlanFinanciamientoNavigation.Descripcion}"
+            });
+        }
         /* Crear nueva solicitud, ejecutar algoritmo de asignacion de plan sugerido. */
         [HttpPost]
         [Route("cliente/{clienteId}")]

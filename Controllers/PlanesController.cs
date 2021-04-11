@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,44 @@ namespace automotriz_webapi.Controllers
         public PlanesController(automotrizContext db)
         {
             this.Db = db;
+        }
+        [HttpGet]
+        [Route("inferioridad/{planId}")]
+        public async Task<IActionResult> Inferiores([FromRoute]int planId){
+            var planActual = await this.Db.PlanesFinanciamientos.FirstOrDefaultAsync(pl => pl.Id == planId);
+            if(planActual == null) return BadRequest();
+            if(planId == 1) return Ok(new List<PlanesFinanciamiento>{planActual});
+            var planes = await this.Db.PlanesFinanciamientos
+                                    .Include(pl => pl.Autos)
+                                    .Include("Autos.IdModeloNavigation.IdMarcaNavigation")
+                                    .Where(pl => 
+                                        pl.MinIngresoAcumulable < planActual.MinIngresoAcumulable
+                                    )
+                                    .OrderByDescending(p => p.Id)
+                                    .ToListAsync();
+            planes.Insert(0, planActual);
+            var planesProcessed = planes.Select(plan => new {
+                id_plan = plan.Id,
+                descripcion = plan.Descripcion,
+                precio_inicial = plan.PrecioInicial,
+                precio_limite = plan.PrecioLimite,
+                autos = plan.Autos.Select(automovil => new {
+                    id_auto = automovil.Id,
+                    valor_comercial = automovil.ValorComecial,
+                    url_imagen = automovil.UrlImagen,
+                    marca = new {
+                        id_marca = automovil.IdModeloNavigation.IdMarcaNavigation.Id,
+                        nombre = automovil.IdModeloNavigation.IdMarcaNavigation.Nombre,
+                        url_imagen = automovil.IdModeloNavigation.IdMarcaNavigation.UrlImagen
+                    },
+                    modelo = new {
+                        id_modelo = automovil.IdModeloNavigation.Id,
+                        nombre = automovil.IdModeloNavigation.Nombre
+                    }
+                })
+            });
+
+            return Ok(planesProcessed);
         }
 
         [HttpGet]
