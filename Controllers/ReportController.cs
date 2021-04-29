@@ -26,7 +26,8 @@ namespace automotriz_webapi.Controllers
             var json = new
             {
                 // like: http://localhost:4200/#/reporte/enganche/automovil/1/plan/1/cliente/11
-                source = data.url
+                source = data.url,
+                delay = 5000
             };
 
             request.AddJsonBody(json);
