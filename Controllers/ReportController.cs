@@ -15,6 +15,7 @@ namespace automotriz_webapi.Controllers
         [HttpPost]
         [Route("enganche")]
         public FileContentResult GenerateReport([FromBody]ReportUrl data){
+            // System.Console.WriteLine(data.url);
             // TODO HTTP RESPONSE
             var client = new RestClient("https://api.pdfshift.io/v3/convert/pdf")
             {
@@ -26,8 +27,8 @@ namespace automotriz_webapi.Controllers
             var json = new
             {
                 // like: http://localhost:4200/#/reporte/enganche/automovil/1/plan/1/cliente/11
-                source = data.url,
-                delay = 5000
+                delay = 10000,
+                source = data.url
             };
 
             request.AddJsonBody(json);
