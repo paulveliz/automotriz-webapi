@@ -19,7 +19,7 @@ namespace automotriz_webapi.Controllers
             // TODO HTTP RESPONSE
             var client = new RestClient("https://api.pdfshift.io/v3/convert/pdf")
             {
-                Authenticator = new HttpBasicAuthenticator("api", "4a274c5975a8475ea957379e2a84e03a")
+                Authenticator = new HttpBasicAuthenticator("api", "dc0eae382d9640f38826da5d20cbd8d1")
             };
 
             var request = new RestRequest(Method.POST);
@@ -27,7 +27,6 @@ namespace automotriz_webapi.Controllers
             var json = new
             {
                 // like: http://localhost:4200/#/reporte/enganche/automovil/1/plan/1/cliente/11
-                delay = 10000,
                 source = data.url
             };
 
