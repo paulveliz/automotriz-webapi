@@ -5,6 +5,9 @@ using RestSharp.Authenticators;
 using System.IO;
 using System.Text;
 using automotriz_webapi.Models;
+using System.Collections;
+using System.Collections.Generic;
+using System;
 
 namespace automotriz_webapi.Controllers
 {
@@ -12,9 +15,20 @@ namespace automotriz_webapi.Controllers
     [Route("api/[controller]")]
     public class ReportController : ControllerBase
     {
+        private readonly automotrizContext Db;
+        public ReportController(automotrizContext db)
+        {
+            this.Db = db;
+        }
+
         [HttpPost]
         [Route("enganche")]
-        public FileContentResult GenerateReport([FromBody]ReportUrl data){
+        public async Task<FileContentResult> GenerateReport([FromBody](ReportUrl data, Financiamiento financiamiento, Deuda deuda) req)
+        {
+            // request: ReportUrl data && Financiamiento financiamiento.
+            var data = req.data;
+            var financiamiento = req.financiamiento;
+            var deuda = req.deuda;
             // System.Console.WriteLine(data.url);
             // TODO HTTP RESPONSE
             var client = new RestClient("https://api.pdfshift.io/v3/convert/pdf")
@@ -39,12 +53,18 @@ namespace automotriz_webapi.Controllers
             }
             else
             {
+                // Crear financiamiento
+                var newFinanciamiento = await this.Db.Financiamientos.AddAsync(financiamiento);
+                await this.Db.SaveChangesAsync();
+                deuda.IdFinanciamiento = newFinanciamiento.Entity.Id;
+                await this.Db.Deudas.AddAsync(deuda);
+                await this.Db.SaveChangesAsync();
                 // WriteAllBytes("wikipedia.pdf", response.RawBytes);
-               var file = File(response.RawBytes, "application/pdf", "new.pdf");
-               return file;
+                var file = File(response.RawBytes, "application/pdf", "new.pdf");
+                return file;
             }
             return null;
         }
     }
-    
+
 }

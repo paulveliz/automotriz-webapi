@@ -91,3 +91,38 @@ ADD FOREIGN KEY (id_estado_civil) REFERENCES Estados_civiles(Id);
 
 ALTER TABLE Planes_financiamientos 
 ADD min_ingreso_acumulable numeric(10,2)
+
+
+
+
+
+
+
+
+
+
+
+-------------------- NEW FEATURES ----------------------------------
+
+CREATE TABLE Financiamientos(
+    Id int primary key identity(1,1),
+    id_cliente int not null,
+    Valor_del_auto numeric(10,2) not null,
+    Enganche numeric(10,2) not null,
+    Cantidad_a_financiar numeric(10,2) not null,
+    Meses int not null,
+    Mensualidad numeric(10,2) not null,
+    FOREIGN KEY (id_cliente) REFERENCES Clientes(Id),
+)
+
+CREATE TABLE Deudas(
+    Id int primary key identity(1,1),
+    id_cliente int not null,
+    Fecha DateTime DEFAULT CURRENT_TIMESTAMP,
+    Ultimo_abono DateTime null,
+    id_financiamiento int not null,
+    id_solicitud int not null,
+    FOREIGN KEY (id_cliente) REFERENCES Clientes(Id),
+    FOREIGN KEY (id_financiamiento) REFERENCES Financiamientos(Id),
+    FOREIGN KEY (id_solicitud) REFERENCES Solicitudes(Id)
+)
