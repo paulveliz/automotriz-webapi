@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace automotriz_webapi.Controllers
         public async Task<IEnumerable<Deuda>> ObtenerDeudasClienteCurp([FromRoute]string curp){
             var response = await this.Db.Deudas
                                     .Include(d => d.IdClienteNavigation)
+                                    .Include(d => d.IdFinanciamientoNavigation)
+                                    .Include(d => d.IdSolicitudNavigation)
                                     .Where(d => 
                                         d.IdClienteNavigation.Curp == curp
                                     ).ToListAsync();
@@ -30,10 +33,19 @@ namespace automotriz_webapi.Controllers
         }
 
         [HttpPost]
-        [Route("nueva")]
-        public async Task<Deuda> CrearNueva([FromBody]Deuda deuda){
-            var result = await this.Db.AddAsync(deuda);
-            return result.Entity;
+        [Route("abonar/{deudaId}")]
+        public async Task<ActionResult<Deuda>> Abonar([FromRoute]int deudaId){
+            // Descontar abono de financiado
+            // Reducir mensualidad
+            var deuda = await this.Db.Deudas
+                                    .Include(d => d.IdFinanciamientoNavigation)
+                                    .FirstOrDefaultAsync(d => d.Id == deudaId);
+            if(deuda==null) return NotFound(new {msg = "La deuda proporcionada no existe."});
+            deuda.IdFinanciamientoNavigation.Meses -= 1;
+            deuda.IdFinanciamientoNavigation.CantidadAFinanciar -= deuda.IdFinanciamientoNavigation.Mensualidad;
+            deuda.UltimoAbono = DateTime.Now;
+            await this.Db.SaveChangesAsync();
+            return Ok(deuda);
         }
 
     }
