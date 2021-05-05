@@ -12,7 +12,7 @@ namespace automotriz_webapi.Controllers
     [Route("api/[controller]")]
     public class DeudasController : ControllerBase
     {
-        public automotrizContext Db;
+        private readonly automotrizContext Db;
         public DeudasController(automotrizContext db)
         {
             this.Db = db;
