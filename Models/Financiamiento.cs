@@ -19,7 +19,9 @@ namespace automotriz_webapi.Models
         public decimal CantidadAFinanciar { get; set; }
         public int Meses { get; set; }
         public decimal Mensualidad { get; set; }
+        public int? IdAutomovil { get; set; }
 
+        public virtual Auto IdAutomovilNavigation { get; set; }
         public virtual Cliente IdClienteNavigation { get; set; }
         public virtual ICollection<Deuda> Deuda { get; set; }
     }

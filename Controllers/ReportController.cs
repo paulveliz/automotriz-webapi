@@ -66,6 +66,37 @@ namespace automotriz_webapi.Controllers
             }
             return null;
         }
+
+        [HttpPost]
+        [Route("abono")]
+        public FileContentResult GenerateAbono([FromBody]ReportUrl data){
+            // TODO HTTP RESPONSE
+            var client = new RestClient("https://api.pdfshift.io/v3/convert/pdf")
+            {
+                Authenticator = new HttpBasicAuthenticator("api", "dc0eae382d9640f38826da5d20cbd8d1")
+            };
+            var request = new RestRequest(Method.POST);
+            var json = new
+            {
+                // like: http://localhost:4200/#/reporte/enganche/automovil/1/plan/1/cliente/11
+                source = data.url,
+                delay = 5000
+            };
+            request.AddJsonBody(json);
+            var response = client.Execute(request);
+            if (!response.IsSuccessful)
+            {
+                // Check why status is not int 2xx.
+            }
+            else
+            {
+                // Crear financiamiento
+                // WriteAllBytes("wikipedia.pdf", response.RawBytes);
+                var file = File(response.RawBytes, "application/pdf", "new.pdf");
+                return file;
+            }
+            return null;
+        }
     }
 
 }
