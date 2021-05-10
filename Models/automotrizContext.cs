@@ -150,6 +150,8 @@ namespace automotriz_webapi.Models
 
                 entity.Property(e => e.Enganche).HasColumnType("numeric(10, 2)");
 
+                entity.Property(e => e.IdAutomovil).HasColumnName("id_automovil");
+
                 entity.Property(e => e.IdCliente).HasColumnName("id_cliente");
 
                 entity.Property(e => e.Mensualidad).HasColumnType("numeric(10, 2)");
@@ -157,6 +159,11 @@ namespace automotriz_webapi.Models
                 entity.Property(e => e.ValorDelAuto)
                     .HasColumnType("numeric(10, 2)")
                     .HasColumnName("Valor_del_auto");
+
+                entity.HasOne(d => d.IdAutomovilNavigation)
+                    .WithMany(p => p.Financiamientos)
+                    .HasForeignKey(d => d.IdAutomovil)
+                    .HasConstraintName("FK__Financiam__id_au__6383C8BA");
 
                 entity.HasOne(d => d.IdClienteNavigation)
                     .WithMany(p => p.Financiamientos)

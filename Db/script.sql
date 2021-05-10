@@ -126,3 +126,9 @@ CREATE TABLE Deudas(
     FOREIGN KEY (id_financiamiento) REFERENCES Financiamientos(Id),
     FOREIGN KEY (id_solicitud) REFERENCES Solicitudes(Id)
 )
+
+
+----------------------- FIXES ---------------------------------
+ALTER TABLE Financiamientos ADD id_automovil INT
+ALTER TABLE Financiamientos
+ADD FOREIGN KEY (id_automovil) REFERENCES Autos(Id);

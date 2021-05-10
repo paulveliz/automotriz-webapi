@@ -210,7 +210,10 @@ namespace automotriz_webapi.Controllers
         [Route("financiar")]
         public async Task<IActionResult> FinanciarAutomovil([FromBody]FinanciamientoModel financiamientoData){
             var plan = await Db.PlanesFinanciamientos.FirstOrDefaultAsync(pl => pl.Id == financiamientoData.Id_plan );
-            var automovil = await Db.Autos.FirstOrDefaultAsync(au => au.Id == financiamientoData.Id_automovil);
+            var automovil = await Db.Autos
+                                    .Include(au => au.IdModeloNavigation)
+                                    .Include(au => au.IdModeloNavigation.IdMarcaNavigation)
+                                    .FirstOrDefaultAsync(au => au.Id == financiamientoData.Id_automovil);
 
             var encanche = automovil.ValorComecial * 20 / 100;
             var cantidadFinanciar = (automovil.ValorComecial - encanche);
@@ -222,7 +225,8 @@ namespace automotriz_webapi.Controllers
                 enganche = encanche,
                 cantidad_a_financiar = cantidadFinanciarProcessed,
                 meses = financiamientoData.Meses,
-                mensualidad = mensualidadProcessed
+                mensualidad = mensualidadProcessed,
+                automovil
             });
         }
 
