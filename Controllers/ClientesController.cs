@@ -190,6 +190,12 @@ namespace automotriz_webapi.Controllers
             cliente.RealCurp = cliente.Curp; // new hot fix.
             // TODO: VERIFICAR SI ES MODIFICABLE LIKE SEARCH BY EFCORE.
             var nuevoCliente = await this.Db.Clientes.AddAsync(cliente);
+            // new hot fix, create encryption data for new client.
+            await this.Db.SaveChangesAsync();
+                        var result = await this.Db.Encriptaciones.AddAsync(new Encriptacione{
+                    IdCliente = nuevoCliente.Entity.Id,
+                    IsEncripted = false
+                });
             await this.Db.SaveChangesAsync();
 
             var createdClient = await this.Db.Clientes
