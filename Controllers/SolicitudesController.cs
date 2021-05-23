@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
+using automotriz_webapi.Libs;
 using automotriz_webapi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -228,6 +229,14 @@ namespace automotriz_webapi.Controllers
                 mensualidad = mensualidadProcessed,
                 automovil
             });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<object>> Encriptar([FromBody]EncryptionModel data){
+            //TODO: Check encriptaciones 
+            var algorithm = new TripleDesLib(data.Clave);
+            
+            return Ok();
         }
 
     }

@@ -20,6 +20,7 @@ namespace automotriz_webapi.Models
         public virtual DbSet<Auto> Autos { get; set; }
         public virtual DbSet<Cliente> Clientes { get; set; }
         public virtual DbSet<Deuda> Deudas { get; set; }
+        public virtual DbSet<Encriptacione> Encriptaciones { get; set; }
         public virtual DbSet<EstadosCivile> EstadosCiviles { get; set; }
         public virtual DbSet<Financiamiento> Financiamientos { get; set; }
         public virtual DbSet<Hijo> Hijos { get; set; }
@@ -129,6 +130,19 @@ namespace automotriz_webapi.Models
                     .HasForeignKey(d => d.IdSolicitud)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Deudas__id_solic__628FA481");
+            });
+
+            modelBuilder.Entity<Encriptacione>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.IdClienteNavigation)
+                    .WithMany()
+                    .HasForeignKey(d => d.IdCliente)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Encriptac__IdCli__6FE99F9F");
             });
 
             modelBuilder.Entity<EstadosCivile>(entity =>

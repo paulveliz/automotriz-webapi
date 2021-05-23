@@ -132,3 +132,12 @@ CREATE TABLE Deudas(
 ALTER TABLE Financiamientos ADD id_automovil INT
 ALTER TABLE Financiamientos
 ADD FOREIGN KEY (id_automovil) REFERENCES Autos(Id);
+
+
+
+CREATE TABLE Encriptaciones(
+	Id int identity(1,1),
+	IsEncripted bit not null default 0,
+	IdCliente int not null,
+	FOREIGN KEY (IdCliente) REFERENCES Clientes(Id)
+)
