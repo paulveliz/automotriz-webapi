@@ -132,3 +132,29 @@ CREATE TABLE Deudas(
 ALTER TABLE Financiamientos ADD id_automovil INT
 ALTER TABLE Financiamientos
 ADD FOREIGN KEY (id_automovil) REFERENCES Autos(Id);
+
+
+
+CREATE TABLE Encriptaciones(
+	Id int identity(1,1) primary key,
+	IsEncripted bit not null default 0,
+	IdCliente int not null,
+	FOREIGN KEY (IdCliente) REFERENCES Clientes(Id)
+)
+
+ALTER TABLE Clientes
+ALTER COLUMN Nombre_completo TEXT;
+
+
+ALTER TABLE Clientes
+ALTER COLUMN Domicilio TEXT;
+
+
+ALTER TABLE Clientes
+ALTER COLUMN Curp TEXT;
+
+ALTER TABLE Clientes
+ADD Real_curp TEXT
+
+ALTER TABLE Clientes
+ALTER COLUMN Real_curp varchar(18);

@@ -20,6 +20,7 @@ namespace automotriz_webapi.Models
         public virtual DbSet<Auto> Autos { get; set; }
         public virtual DbSet<Cliente> Clientes { get; set; }
         public virtual DbSet<Deuda> Deudas { get; set; }
+        public virtual DbSet<Encriptacione> Encriptaciones { get; set; }
         public virtual DbSet<EstadosCivile> EstadosCiviles { get; set; }
         public virtual DbSet<Financiamiento> Financiamientos { get; set; }
         public virtual DbSet<Hijo> Hijos { get; set; }
@@ -62,14 +63,9 @@ namespace automotriz_webapi.Models
 
             modelBuilder.Entity<Cliente>(entity =>
             {
-                entity.Property(e => e.Curp)
-                    .IsRequired()
-                    .HasMaxLength(18)
-                    .IsUnicode(false);
+                entity.Property(e => e.Curp).HasColumnType("text");
 
-                entity.Property(e => e.Domicilio)
-                    .IsRequired()
-                    .IsUnicode(false);
+                entity.Property(e => e.Domicilio).HasColumnType("text");
 
                 entity.Property(e => e.FechaNacimiento)
                     .HasColumnType("date")
@@ -82,9 +78,13 @@ namespace automotriz_webapi.Models
                     .HasColumnName("Ingresos_mensuales");
 
                 entity.Property(e => e.NombreCompleto)
-                    .IsRequired()
-                    .IsUnicode(false)
+                    .HasColumnType("text")
                     .HasColumnName("Nombre_completo");
+
+                entity.Property(e => e.RealCurp)
+                    .HasMaxLength(18)
+                    .IsUnicode(false)
+                    .HasColumnName("Real_curp");
 
                 entity.Property(e => e.UrlImagen)
                     .IsUnicode(false)
@@ -129,6 +129,15 @@ namespace automotriz_webapi.Models
                     .HasForeignKey(d => d.IdSolicitud)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Deudas__id_solic__628FA481");
+            });
+
+            modelBuilder.Entity<Encriptacione>(entity =>
+            {
+                entity.HasOne(d => d.IdClienteNavigation)
+                    .WithMany(p => p.Encriptaciones)
+                    .HasForeignKey(d => d.IdCliente)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Encriptac__IdCli__03F0984C");
             });
 
             modelBuilder.Entity<EstadosCivile>(entity =>
