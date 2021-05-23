@@ -32,7 +32,7 @@ namespace automotriz_webapi
             services.AddCors();
             
             services.AddDbContext<automotrizContext>(options => 
-                options.UseSqlServer(Configuration.GetConnectionString("automotriz-qa"))
+                options.UseSqlServer(Configuration.GetConnectionString("automotriz"))
             );
             services.AddControllers().AddNewtonsoftJson(opt =>
                 opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
