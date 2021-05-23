@@ -28,7 +28,7 @@ namespace automotriz_webapi.Controllers
                                     .Include(d => d.IdSolicitudNavigation)
                                     .Include(d => d.IdFinanciamientoNavigation.IdAutomovilNavigation)
                                     .Where(d => 
-                                        d.IdClienteNavigation.Curp == curp
+                                        d.IdClienteNavigation.RealCurp == curp
                                     ).ToListAsync();
             return response;
         }

@@ -129,7 +129,7 @@ namespace automotriz_webapi.Controllers
                                 .Include(cl => cl.IdEstadoCivilNavigation)
                                 .Include("Solicitudes.IdPlanFinanciamientoNavigation")
                                 .Include(cl => cl.Hijos)
-                                .FirstOrDefaultAsync(cl => cl.Curp == curp.Trim());
+                                .FirstOrDefaultAsync(cl => cl.RealCurp == @curp);
             if(cliente == null) return BadRequest(new {
                 code = 400,
                 msg = "El cliente solicitado no existe en el sistema."
@@ -180,13 +180,14 @@ namespace automotriz_webapi.Controllers
                 return BadRequest();
             }
 
-            if(ValidarCurp(cliente.Curp)){
+            if(ValidarCurp(cliente.RealCurp)){
                 return UnprocessableEntity(new {
                     code = 422,
                     msg = $"La curp <{cliente.Curp}>  ya existe en el sistema."
                 });
             }
             
+            cliente.RealCurp = cliente.Curp; // new hot fix.
             // TODO: VERIFICAR SI ES MODIFICABLE LIKE SEARCH BY EFCORE.
             var nuevoCliente = await this.Db.Clientes.AddAsync(cliente);
             await this.Db.SaveChangesAsync();

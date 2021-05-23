@@ -1,11 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Threading.Tasks;
 using automotriz_webapi.Libs;
 using automotriz_webapi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace automotriz_webapi.Controllers
 {
@@ -232,12 +236,73 @@ namespace automotriz_webapi.Controllers
         }
 
         [HttpPost]
+        [Route("encrypt")]
         public async Task<ActionResult<object>> Encriptar([FromBody]EncryptionModel data){
-            //TODO: Check encriptaciones 
             var algorithm = new TripleDesLib(data.Clave);
-            
-            return Ok();
+            var client = await this.Db.Clientes
+                                .FirstOrDefaultAsync(cl => cl.Id == @data.ClienteId);
+            if(client == null) return NotFound(new { msg = "El cliente solicitado no se encontro."});
+
+            var encryptData = await this.Db.Encriptaciones
+                                            .FirstOrDefaultAsync(crypt => crypt.IdCliente == @data.ClienteId);
+            // Create encryptdata;
+            if(encryptData == null){
+                var result = await this.Db.Encriptaciones.AddAsync(new Encriptacione{
+                        IdCliente = client.Id,
+                        IsEncripted = false
+                    });
+                await this.Db.SaveChangesAsync();
+                encryptData = result.Entity; 
+            }
+
+            if(encryptData.IsEncripted){
+                // Decriptar.
+                client.NombreCompleto = algorithm.Decrypt(client.NombreCompleto);
+                client.Curp = algorithm.Decrypt(client.Curp);
+                client.Domicilio = algorithm.Decrypt(client.Domicilio);
+                // client.IngresosMensuales = Convert.ToDecimal( algorithm.Decrypt(client.IngresosMensuales.ToString()) );
+                // client.Edad = Convert.ToByte( algorithm.Decrypt(client.Edad.ToString()) );
+                // client.FechaNacimiento = Convert.ToDateTime( algorithm.Decrypt(client.FechaNacimiento.ToString()) );
+                encryptData.IsEncripted = false;
+                await this.Db.SaveChangesAsync();
+                return Ok(new {
+                    ok = true,
+                    msg = $"Informacion del cliente {client.NombreCompleto} decriptada correctamente."
+                });
+            }else{
+                // Encriptar
+                client.NombreCompleto = algorithm.Encrypt(client.NombreCompleto);
+                client.Curp = algorithm.Encrypt(client.Curp);
+                client.Domicilio = algorithm.Encrypt(client.Domicilio);
+                // client.IngresosMensuales = decimal.Parse( algorithm.Encrypt(client.IngresosMensuales.ToString()), CultureInfo.InvariantCulture );
+                // client.Edad = byte.Parse( algorithm.Encrypt(client.Edad.ToString()), CultureInfo.InvariantCulture );
+                // client.FechaNacimiento = Convert.ToDateTime( algorithm.Encrypt(client.FechaNacimiento.ToString()) );
+                encryptData.IsEncripted = true;
+                await this.Db.SaveChangesAsync();
+                return Ok(new {
+                    ok = true,
+                    msg = $"Informacion del cliente {client.NombreCompleto} encriptada correctamente."
+                });
+            }
         }
 
+        [HttpGet]
+        [Route("is_encripted/{idCliente}")]
+        public async Task<ActionResult<object>> HasEncryptedData([FromRoute]int idCliente){
+            var isEncrypted = await this.Db.Encriptaciones.FirstOrDefaultAsync(enc => enc.IdCliente == idCliente);
+            if(isEncrypted == null) return NotFound(new {ok = false, msg = "No hay rastro de este cliente en la base de datos."});
+
+            return isEncrypted.IsEncripted ? new {
+                ok = true,
+                is_encripted = true,
+                msg = "ENCRIPTADO"
+            } 
+            : 
+            new  {
+                ok = true,
+                is_encripted = false,
+                msg = "NO ENCRIPTADO"
+            };
+        }
     }
 }
